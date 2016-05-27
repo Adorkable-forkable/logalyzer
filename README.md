@@ -3,7 +3,7 @@ logalyzer
 
 This is a fork of a sshd log analyzer by hatRiot.
 I've added the ability to look up what country the user logged in from
-using [Maxmind's GeoLite2-City][1] database
+using [Maxmind's GeoLite2-Country][1] database
 
 Some examples:
 
@@ -20,7 +20,7 @@ Options:
   -s          List success logs
   -c          List commands by user
   -i          List IP Addresses
-  -g GEOIPDB  Location of GeoIP database. Default is GeoLite2-City.mmdb
+  -g GEOIPDB  Location of GeoIP database. Default is GeoLite2-Country.mmdb
 
 Combine flags to view user-specific information.  '-u test -i' lists IP
 addresses associated with user test

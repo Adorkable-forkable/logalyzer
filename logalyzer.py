@@ -36,7 +36,7 @@ if __name__=="__main__":
 	parser.add_option("-s", help="List success logs", action="store_true", default=False, dest="success")
 	parser.add_option("-c", help="List commands by user", action="store_true", default=False, dest="commands")
 	parser.add_option("-i", help="List IP Addresses", action="store_true", default=False, dest="ip")
-	parser.add_option("-g", help="Location of GeoIP database. Default is GeoLite2-City.mmdb", default="GeoLite2-City.mmdb", dest="geoipdb")
+	parser.add_option("-g", help="Location of GeoIP database. Default is GeoLite2-Country.mmdb", default="GeoLite2-Country.mmdb", dest="geoipdb")
 
 	# get arguments
 	(options, args) = parser.parse_args()
