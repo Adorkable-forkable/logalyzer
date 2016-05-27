@@ -20,7 +20,7 @@ Options:
   -s          List success logs
   -c          List commands by user
   -i          List IP Addresses
-  -g GEOIPDATABASE  Location of GeoIP database. Default is GeoLite2-City.mmdb
+  -g GEOIPDB  Location of GeoIP database. Default is GeoLite2-City.mmdb
 
 Combine flags to view user-specific information.  '-u test -i' lists IP
 addresses associated with user test

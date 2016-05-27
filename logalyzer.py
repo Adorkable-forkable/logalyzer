@@ -36,7 +36,7 @@ if __name__=="__main__":
 	parser.add_option("-s", help="List success logs", action="store_true", default=False, dest="success")
 	parser.add_option("-c", help="List commands by user", action="store_true", default=False, dest="commands")
 	parser.add_option("-i", help="List IP Addresses", action="store_true", default=False, dest="ip")
-	parser.add_option("-g", help="Location of GeoIP database. Default is GeoLite2-City.mmdb", default="GeoLite2-City.mmdb", dest="geoipdatabase")
+	parser.add_option("-g", help="Location of GeoIP database. Default is GeoLite2-City.mmdb", default="GeoLite2-City.mmdb", dest="geoipdb")
 
 	# get arguments
 	(options, args) = parser.parse_args()
@@ -51,7 +51,7 @@ if __name__=="__main__":
 		log = options.log
 
 	# parse logs
-	LOGS = ParseLogs.ParseLogs(log, options.geoipdatabase)
+	LOGS = ParseLogs.ParseLogs(log, options.geoipdb)
 	if LOGS is None: sys.exit(1)
 
 	# validate the user
