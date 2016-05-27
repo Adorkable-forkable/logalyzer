@@ -36,7 +36,7 @@ if __name__=="__main__":
 	parser.add_option("-s", help="List success logs", action="store_true", default=False, dest="success")
 	parser.add_option("-c", help="List commands by user", action="store_true", default=False, dest="commands")
 	parser.add_option("-i", help="List IP Addresses", action="store_true", default=False, dest="ip")
-	parser.add_option("-g", help="Location of GeoIP database", default="GeoIP.dat", dest="geoipdatabase")
+	parser.add_option("-g", help="Location of GeoIP database. Default is GeoLite2-City.mmdb", default="GeoLite2-City.mmdb", dest="geoipdatabase")
 
 	# get arguments
 	(options, args) = parser.parse_args()
@@ -51,7 +51,7 @@ if __name__=="__main__":
 		log = options.log
 
 	# parse logs
-	LOGS = ParseLogs.ParseLogs(log)
+	LOGS = ParseLogs.ParseLogs(log, options.geoipdatabase)
 	if LOGS is None: sys.exit(1)
 
 	# validate the user
@@ -81,7 +81,7 @@ if __name__=="__main__":
 	elif options.ip and not options.user:
 		for i in LOGS:
 			for ip in LOGS[i].ips:
-				print "{0}:\t{1}".format(i, ip)
+				print "{0}:\t{1}\t({2})".format(i, ip[0], ip[1])
 		sys.exit(1)
 
 	# output user-specific commands
@@ -106,7 +106,7 @@ if __name__=="__main__":
 	elif options.ip and options.user:
 		print "[+] Logged IPs for user \'%s\'"%options.user
 		for i in LOGS[options.user].ips:
-			print "\t", i
+			print "\t{0}\t({1})".format(i[0], i[1])
 
 	# print out all information regarding specified user
 	elif options.user is not None:
@@ -121,7 +121,7 @@ if __name__=="__main__":
 			print "\t", succ
 		print "[!] Associated IPs"
 		for ip in LOGS[options.user].ips:
-			print "\t", ip
+			print "\t{0}\t({1})".format(ip[0], ip[1])
 		print "[!] Commands"
 		for comm in LOGS[options.user].commands:
 			print "\t", comm

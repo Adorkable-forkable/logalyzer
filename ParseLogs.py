@@ -1,6 +1,7 @@
 import re
+import sys
 import gzip
-import pygeoip
+import geoip2.database, maxminddb.errors, geoip2.errors
 
 #
 # ParseLogs.py
@@ -32,13 +33,13 @@ class Log:
 		self.fail_logs = []
 		self.succ_logs = []
 		self.ips = []
-		self.coutries = []
+		self.countries = []
 		self.commands = []
 
 # parse user from various lines
 def ParseUsr(line):
 	usr = None
-	if "Accepted password" in line:
+	if "Accepted " in line:
 		usr = re.search(r'(\bfor\s)(\w+)', line)
 	elif "sudo:" in line:
 		usr = re.search(r'(sudo:\s+)(\w+)', line)
@@ -53,12 +54,27 @@ def ParseUsr(line):
 def ParseIP(line):
 	ip = re.search(r'(\bfrom\s)(\b((\s*((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\s*)|(\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*)\b))', line)
 	if ip is not None:
-		return ip.group(2)
+		return ip.group(2).strip()
 
 # Look up country of origin
-def LookupCountry(ip):
-	gi = pygeoip.GeoIP('GeoIP.dat')
-	return gi.country_name_by_addr(ip)
+def LookupCountry(ip, geoipdatabase):
+	try:
+		reader = geoip2.database.Reader(geoipdatabase)
+	except IOError as e:
+		print "[-] Could not find GeoIP database {0}".format(geoipdatabase)
+		print "[-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database"
+		sys.exit(1)
+	except maxminddb.errors.InvalidDatabaseError as e:
+		print "[-] Database {0} doesn't look to be a valid database".format(geoipdatabase)
+		print "[-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database"
+		sys.exit(1)
+	try:
+		response = reader.country(ip)
+		return response.country.name
+	except geoip2.errors.AddressNotFoundError as e:
+		print "[w] {0} might be invalid".format(ip)
+		return "Unkown"
+
 
 # parse a date from the line
 def ParseDate(line):
@@ -74,7 +90,7 @@ def ParseCmd(line):
 		return cmd.group(2)
 
 # begin parsing the passed LOG
-def ParseLogs(LOG):
+def ParseLogs(LOG, GEOPIP):
 	# initialize the dictionary
 	logs = {}
 
@@ -91,7 +107,7 @@ def ParseLogs(LOG):
 
 	for line in log.split('\n'):
 		# match a login
-		if "Accepted password for" in line:
+		if "Accepted " in line:
 			usr = ParseUsr(line)
 
 			# add 'em if they don't exist
@@ -99,11 +115,10 @@ def ParseLogs(LOG):
 				logs[usr] = Log(usr)
 
 			ip = ParseIP(line)
-			country = LookupCountry(ip)
+			country = LookupCountry(ip, GEOPIP)
 			# set info
 			if not ip in logs[usr].ips:
-				logs[usr].ips.append(ip)
-				logs[usr].countries.append(country)
+				logs[usr].ips.append([ip, country])
 			logs[usr].succ_logs.append(line.rstrip('\n'))
 			logs[usr].logs.append(line.rstrip('\n'))
 
@@ -116,11 +131,10 @@ def ParseLogs(LOG):
 				logs[usr] = Log(usr)
 
 			ip = ParseIP(line)
-			country = LookupCountry(ip)
+			country = LookupCountry(ip, GEOPIP)
 
 			if not ip in logs[usr].ips:
-				logs[usr].ips.append(ip)
-				logs[usr].countries.append(country)
+				logs[usr].ips.append([ip, country])
 			logs[usr].fail_logs.append(line.rstrip('\n'))
 			logs[usr].logs.append(line.rstrip('\n'))
 
@@ -139,10 +153,9 @@ def ParseLogs(LOG):
 					logs[usr] = Log(usr)
 
 				ip = ParseIP(line)
-				country = LookupCountry(ip)
+				country = LookupCountry(ip, GEOPIP)
 
-				logs[usr].ips.append(ip)
-				logs[usr].countries.append(country)
+				logs[usr].ips.append([ip, country])
 			# parse sudo/su fails
 			else:
 				if not usr in logs:
