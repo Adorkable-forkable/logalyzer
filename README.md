@@ -1,9 +1,11 @@
 logalyzer
 =========
 
-This is a fork of a sshd log analyzer by hatRiot.
-I've added the ability to look up what country the user logged in from
-using [Maxmind's GeoLite2-Country][1] database
+Logalyzer is a script written make looking through the auth logs neater.  It can parse users, IP addresses, failures, etc.
+
+* Originally written by [hatRiot](https://github.com/hatRiot).
+* Country lookup implemented by [thorerik](https://github.com/thorerik).
+* Additional work by [yoiang](https://github.com/yoiang).
 
 Some examples:
 
