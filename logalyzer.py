@@ -76,25 +76,25 @@ if __name__ == "__main__":
                 print("\t", com)
 
         # output user-specific success logs
-        elif options.success:
+        if options.success:
             print("[+] Successes logs for user \'%s\'" % options.user)
             for log in LOGS[options.user].succ_logs:
                 print("\t", log)
 
         # output user-specific failures
-        elif options.fail:
+        if options.fail:
             print("[+] Failures for user \'%s\'" % options.user)
             for fail in LOGS[options.user].fail_logs:
                 print("\t", fail)
 
         # output user-specific ip addresses
-        elif options.ip:
+        if options.ip:
             print("[+] Logged IPs for user \'%s\'" % options.user)
             for i in LOGS[options.user].ips:
                 print("\t", i)
 
         # print(out all information regarding specified user)
-        else:
+        if options.commands is None and options.success is None and options.fail is None and options.ip is None and options.fullu is None:
             print("[!] Logs associated with user \'%s\'" % options.user)
             print('[+] First log: ', LOGS[options.user].first_date())
             print('[+] Last log: ', LOGS[options.user].last_date())
@@ -126,7 +126,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # output all successes
-        elif options.success:
+        if options.success:
             print("[+] All successes")
             for i in LOGS:
                 for fail in LOGS[i].succ_logs:
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # output all failures
-        elif options.fail:
+        if options.fail:
             print("[+] All failures")
             for i in LOGS:
                 for fail in LOGS[i].fail_logs:
@@ -142,7 +142,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # output all logged IP addresses
-        elif options.ip:
+        if options.ip:
             print("[+] All logged IP Addresses")
             for i in LOGS:
                 for ip in LOGS[i].ips:
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # if they supplied us with an empty user, dump all of the logged users
-        else:
+        if options.commands is None and options.success is None and options.fail is None and options.ip is None:
             print("[+] All users")
             if len(LOGS) > 0:
                 for i in LOGS:
