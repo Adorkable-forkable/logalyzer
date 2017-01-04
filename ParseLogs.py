@@ -99,7 +99,7 @@ def ParseLogs(LOG, GEOPIP):
     try:
         f = gzip.open(LOG, 'r') if '.gz' in LOG else open(LOG, 'r')
         log = f.read()
-    except Exception, e:
+    except Exception as e:
         print '[-] Error opening \'%s\': %s'%(LOG,e)
         return None
     finally:
