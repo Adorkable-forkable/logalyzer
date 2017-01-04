@@ -43,7 +43,7 @@ class Log:
 # parse user from various lines
 def ParseUsr(line):
     usr = None
-    if "Accepted " in line:
+    if "Accepted password" in line or "Accepted publickey for" in line:
         usr = re.search(r'(\bfor\s)(\w+)', line)
     elif "sudo:" in line:
         usr = re.search(r'(sudo:\s+)(\w+)', line)
@@ -66,6 +66,9 @@ def ParseIP(line):
 
 # Look up country of origin
 def LookupCountry(ip, geoipdatabase):
+    if ip is None:
+        return "Unknown"
+
     try:
         reader = geoip2.database.Reader(geoipdatabase)
     except IOError as e:
@@ -81,7 +84,7 @@ def LookupCountry(ip, geoipdatabase):
         return response.country.name
     except geoip2.errors.AddressNotFoundError as e:
         print("[w] ){0} might be invalid".format(ip))
-        return "Unkown"
+        return "Unknown"
 
 
 # parse a date from the line
@@ -110,7 +113,7 @@ def ParseLogs(LOG, GEOPIP):
         f = gzip.open(LOG, 'r') if '.gz' in LOG else open(LOG, 'r')
         log = f.read()
     except Exception as e:
-        print('[)-] Error opening \'%s\': %s' % (LOG, e))
+        print('[-] Error opening \'%s\': %s' % (LOG, e))
         return None
     finally:
         if f is not None:
@@ -118,7 +121,7 @@ def ParseLogs(LOG, GEOPIP):
 
     for line in log.split('\n'):
         # match a login
-        if "Accepted " in line:
+        if "Accepted password for" in line or "Accepted publickey for" in line:
             usr = ParseUsr(line)
 
             # add 'em if they don't exist
@@ -173,7 +176,7 @@ def ParseLogs(LOG, GEOPIP):
                     logs[usr] = Log(usr)
             logs[usr].fail_logs.append(line.rstrip('\n'))
             logs[usr].logs.append(line.rstrip('\n'))
-            # match commands
+        # match commands
         elif "sudo:" in line:
             # parse user
             usr = ParseUsr(line)
