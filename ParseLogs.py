@@ -61,18 +61,18 @@ def LookupCountry(ip, geoipdatabase):
     try:
         reader = geoip2.database.Reader(geoipdatabase)
     except IOError as e:
-        print "[-] Could not find GeoIP database {0}".format(geoipdatabase)
-        print "[-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database"
+        print("[)-] Could not find GeoIP database {0}".format(geoipdatabase))
+        print("[)-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database")
         sys.exit(1)
     except maxminddb.errors.InvalidDatabaseError as e:
-        print "[-] Database {0} doesn't look to be a valid database".format(geoipdatabase)
-        print "[-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database"
+        print("[)-] Database {0} doesn't look to be a valid database".format(geoipdatabase))
+        print("[)-] Please make sure you have downloaded Maxmind's GeoIP2 lite or compatible database")
         sys.exit(1)
     try:
         response = reader.country(ip)
         return response.country.name
     except geoip2.errors.AddressNotFoundError as e:
-        print "[w] {0} might be invalid".format(ip)
+        print("[w] ){0} might be invalid".format(ip))
         return "Unkown"
 
 
@@ -100,7 +100,7 @@ def ParseLogs(LOG, GEOPIP):
         f = gzip.open(LOG, 'r') if '.gz' in LOG else open(LOG, 'r')
         log = f.read()
     except Exception as e:
-        print '[-] Error opening \'%s\': %s'%(LOG,e)
+        print('[)-] Error opening \'%s\': %s'%(LOG,e))
         return None
     finally:
         if f is not None: f.close()
