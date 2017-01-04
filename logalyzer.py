@@ -129,8 +129,8 @@ if __name__ == "__main__":
         if options.success:
             print("[+] All successes")
             for i in LOGS:
-                for fail in LOGS[i].succ_logs:
-                    print("{0}:\t{1}".format(i, fail))
+                for success in LOGS[i].succ_logs:
+                    print("{0}:\t{1}".format(i, success))
             sys.exit(1)
 
         # output all failures
